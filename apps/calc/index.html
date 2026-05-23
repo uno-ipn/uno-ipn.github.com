@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Калькулятор</title>
+<style>
+:root {
+--bg-color: #0f172a;
+--calc-bg: #1e293b;
+--display-bg: #0f172a;
+--btn-digit-bg: #334155;
+--btn-digit-hover: #475569;
+--btn-op-bg: #f97316;
+--btn-op-hover: #ea580c;
+--btn-fn-bg: #64748b;
+--btn-fn-hover: #475569;
+--btn-mem-bg: #475569;
+--btn-mem-hover: #334155;
+--text-color: #f8facc;
+--accent-color: #38bdf8;
+}
+​* {
+box-sizing: border-box;
+margin: 0;
+padding: 0;
+user-select: none;
+-webkit-user-select: none;
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+​body {
+background-color: var(--bg-color);
+color: var(--text-color);
+display: flex;
+justify-content: center;
+align-items: center;
+min-height: 100dvh;
+padding: 16px;
+}
+​.calculator {
+background-color: var(--calc-bg);
+width: 100%;
+max-width: 400px;
+border-radius: 24px;
+padding: 24px;
+box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+display: flex;
+flex-direction: column;
+gap: 20px;
+}
+​.screen {
+background-color: var(--display-bg);
+border-radius: 16px;
+padding: 20px;
+min-height: 120px;
+display: flex;
+flex-direction: column;
+justify-content: space-between;
+align-items: flex-end;
+position: relative;
+overflow: hidden;
+border: 1px solid rgba(255, 255, 255, 0.05);
+}
+​.meta-indicators {
+width: 100%;
+display: flex;
+justify-content: space-between;
+align-items: center;
+height: 20px;
+}
+​.memory-indicator {
+background-color: var(--accent-color);
+color: var(--bg-color);
+font-size: 0.75rem;
+font-weight: bold;
+padding: 2px 6px;
+border-radius: 4px;
+opacity: 0;
+transition: opacity 0.2s;
+}
+​.memory-indicator.visible {
+opacity: 1;
+}
+​.formula {
+color: #94a3b8;
+font-size: 1.1rem;
+min-height: 1.5rem;
+word-break: break-all;
+text-align: right;
+}
+​.output {
+font-size: 2.5rem;
+font-weight: 600;
+max-width: 100%;
+word-wrap: break-word;
+word-break: break-all;
+text-align: right;
+line-height: 1.2;
+}
+​.grid {
+display: grid;
+grid-template-columns: repeat(4, 1fr);
+gap: 12px;
+}
+​button {
+border: none;
+outline: none;
+border-radius: 16px;
+font-size: 1.25rem;
+font-weight: bold;
+color: var(--text-color);
+height: 64px;
+cursor: pointer;
+transition: background-color 0.15s, transform 0.05s;
+display: flex;
+align-items: center;
+justify-content: center;
+touch-action: manipulation;
+}
+​button:active {
+transform: scale(0.95);
+}
+​.btn-mem {
+background-color: var(--btn-mem-bg);
+font-size: 0.95rem;
+}
+​.btn-mem:hover {
+background-color: var(--btn-mem-hover);
+}
+​.btn-fn {
+background-color: var(--btn-fn-bg);
+}
+​.btn-fn:hover {
+background-color: var(--btn-fn-hover);
+}
+​.btn-digit {
+background-color: var(--btn-digit-bg);
+}
+​.btn-digit:hover {
+background-color: var(--btn-digit-hover);
+}
+​.btn-op {
+background-color: var(--btn-op-bg);
+}
+​.btn-op:hover {
+background-color: var(--btn-op-hover);
+}
+​.double-width {
+grid-column: span 1;
+}
+</style>
+</head>
+<body>
+​<div class="calculator">
+<div class="screen">
+<div class="meta-indicators">
+<span id="memory-indicator" class="memory-indicator">M</span>
+<div id="formula" class="formula"></div>
+</div>
+<div id="output" class="output">0</div>
+</div>
+​<div class="grid">
+<button class="btn-mem" onclick="handleMemory('MC')">MC</button>
+<button class="btn-mem" onclick="handleMemory('MR')">MR</button>
+<button class="btn-mem" onclick="handleMemory('M+')">M+</button>
+<button class="btn-mem" onclick="handleMemory('M-')">M-</button>
+​<button class="btn-fn" onclick="resetCalculator()">C</button>
+<button class="btn-fn" onclick="handleSquareRoot()">√</button>
+<button class="btn-fn" onclick="handlePercentage()">%</button>
+<button class="btn-op" onclick="handleOperator('/')">÷</button>
+​<button class="btn-digit" onclick="inputDigit('7')">7</button>
+<button class="btn-digit" onclick="inputDigit('8')">8</button>
+<button class="btn-digit" onclick="inputDigit('9')">9</button>
+<button class="btn-op" onclick="handleOperator('*')">×</button>
+​<button class="btn-digit" onclick="inputDigit('4')">4</button>
+<button class="btn-digit" onclick="inputDigit('5')">5</button>
+<button class="btn-digit" onclick="inputDigit('6')">6</button>
+<button class="btn-op" onclick="handleOperator('-')">−</button>
+​<button class="btn-digit" onclick="inputDigit('1')">1</button>
+<button class="btn-digit" onclick="inputDigit('2')">2</button>
+<button class="btn-digit" onclick="inputDigit('3')">3</button>
+<button class="btn-op" onclick="handleOperator('+')">+</button>
+​<button class="btn-digit" onclick="inputDigit('0')">0</button>
+<button class="btn-digit" onclick="inputDecimal()">.</button>
+<button class="btn-fn" onclick="handleBackspace()">⌫</button>
+<button class="btn-op" onclick="handleEqual()">=</button>
+</div>
+</div>
+​<script>
+const state = {
+currentValue: "0",
+previousValue: "",
+operator: null,
+memory: 0,
+isResetOnNextInput: false,
+lastOperator: null,
+lastOperand: null,
+hasError: false
+};
+​const displayOutput = document.getElementById("output");
+const displayFormula = document.getElementById("formula");
+const memoryIndicator = document.getElementById("memory-indicator");
+​function resetCalculator() {
+state.currentValue = "0";
+state.previousValue = "";
+state.operator = null;
+state.isResetOnNextInput = false;
+state.lastOperator = null;
+state.lastOperand = null;
+state.hasError = false;
+updateDisplay();
+}
+​function inputDigit(digit) {
+if (state.hasError) return;
+​if (state.isResetOnNextInput) {
+state.currentValue = digit;
+state.isResetOnNextInput = false;
+} else {
+if (state.currentValue === "0") {
+state.currentValue = digit;
+} else {
+if (state.currentValue.length < 15) {
+state.currentValue += digit;
+}
+}
+}
+updateDisplay();
+}
+​function inputDecimal() {
+if (state.hasError) return;
+​if (state.isResetOnNextInput) {
+state.currentValue = "0.";
+state.isResetOnNextInput = false;
+} else {
+if (!state.currentValue.includes(".")) {
+state.currentValue += ".";
+}
+}
+updateDisplay();
+}
+​function handleBackspace() {
+if (state.hasError) {
+resetCalculator();
+return;
+}
+if (state.isResetOnNextInput) return;
+​if (state.currentValue.length > 1) {
+state.currentValue = state.currentValue.slice(0, -1);
+} else {
+state.currentValue = "0";
+}
+updateDisplay();
+}
+​function handleOperator(nextOperator) {
+if (state.hasError) return;
+​const val = parseFloat(state.currentValue);
+​if (state.operator && !state.isResetOnNextInput) {
+calculate();
+}
+​state.previousValue = state.currentValue;
+state.operator = nextOperator;
+state.isResetOnNextInput = true;
+updateDisplay();
+}
+​function calculate() {
+const num1 = parseFloat(state.previousValue);
+const num2 = parseFloat(state.currentValue);
+​if (isNaN(num1) || isNaN(num2)) return;
+​if (state.operator === '/' && num2 === 0) {
+showError("Помилка: Ділення на 0");
+return;
+}
+​const result = safeEval(num1, state.operator, num2);
+state.currentValue = String(result);
+}
+​function handleEqual() {
+if (state.hasError) return;
+​let op = state.operator;
+let num1 = parseFloat(state.previousValue);
+let num2 = parseFloat(state.currentValue);
+​if (!op && state.lastOperator) {
+op = state.lastOperator;
+num1 = parseFloat(state.currentValue);
+num2 = state.lastOperand;
+}
+​if (op) {
+if (op === '/' && num2 === 0) {
+showError("Помилка: Ділення на 0");
+return;
+}
+​const result = safeEval(num1, op, num2);
+if (isNaN(result) || !isFinite(result)) {
+showError("Помилка");
+return;
+}
+​state.lastOperator = op;
+state.lastOperand = num2;
+​state.currentValue = String(result);
+state.previousValue = "";
+state.operator = null;
+state.isResetOnNextInput = true;
+}
+updateDisplay();
+}
+​function safeEval(num1, op, num2) {
+let result;
+switch(op) {
+case '+': result = num1 + num2; break;
+case '-': result = num1 - num2; break;
+case '*': result = num1 * num2; break;
+case '/': result = num1 / num2; break;
+default: return num2;
+}
+return parseFloat(result.toPrecision(12));
+}
+​function handleSquareRoot() {
+if (state.hasError) return;
+const val = parseFloat(state.currentValue);
+if (val < 0) {
+showError("Помилка: Від'ємне число");
+return;
+}
+const result = Math.sqrt(val);
+state.currentValue = String(parseFloat(result.toPrecision(12)));
+state.isResetOnNextInput = true;
+updateDisplay();
+}
+​function handlePercentage() {
+if (state.hasError) return;
+const val = parseFloat(state.currentValue);
+​if (state.operator && state.previousValue !== "") {
+const prev = parseFloat(state.previousValue);
+let percentVal;
+if (state.operator === '+' || state.operator === '-') {
+percentVal = prev * (val / 100);
+} else {
+percentVal = val / 100;
+}
+state.currentValue = String(parseFloat(percentVal.toPrecision(12)));
+} else {
+state.currentValue = String(parseFloat((val / 100).toPrecision(12)));
+}
+updateDisplay();
+}
+​function handleMemory(memOp) {
+if (state.hasError) return;
+const val = parseFloat(state.currentValue) || 0;
+​switch(memOp) {
+case 'MC':
+state.memory = 0;
+break;
+case 'MR':
+state.currentValue = String(state.memory);
+state.isResetOnNextInput = true;
+break;
+case 'M+':
+state.memory += val;
+state.isResetOnNextInput = true;
+break;
+case 'M-':
+state.memory -= val;
+state.isResetOnNextInput = true;
+break;
+}
+updateDisplay();
+}
+​function showError(msg) {
+state.hasError = true;
+state.currentValue = msg;
+state.previousValue = "";
+state.operator = null;
+updateDisplay();
+}
+​function formatDisplay(valStr) {
+if (state.hasError) return valStr;
+const num = Number(valStr);
+if (isNaN(num)) return valStr;
+​if (Math.abs(num) > 999999999999 || (valStr.length > 12 && valStr.includes('.'))) {
+return num.toExponential(7);
+}
+return valStr;
+}
+​function updateDisplay() {
+displayOutput.textContent = formatDisplay(state.currentValue);
+​let opSymbol = "";
+if (state.operator) {
+if (state.operator === '*') opSymbol = ' ×';
+else if (state.operator === '/') opSymbol = ' ÷';
+else if (state.operator === '-') opSymbol = ' −';
+else opSymbol =  ${state.operator};
+}
+​displayFormula.textContent = state.operator ? ${state.previousValue}${opSymbol} : "";
+​if (state.memory !== 0) {
+memoryIndicator.classList.add("visible");
+} else {
+memoryIndicator.classList.remove("visible");
+}
+​adjustFontSize();
+}
+​function adjustFontSize() {
+const len = displayOutput.textContent.length;
+if (len > 12) {
+displayOutput.style.fontSize = "1.6rem";
+} else if (len > 8) {
+displayOutput.style.fontSize = "2rem";
+} else {
+displayOutput.style.fontSize = "2.5rem";
+}
+}
+​window.addEventListener("keydown", (e) => {
+const key = e.key;
+if (key >= "0" && key <= "9") {
+inputDigit(key);
+} else if (key === "." || key === ",") {
+inputDecimal();
+} else if (key === "+") {
+handleOperator("+");
+} else if (key === "-") {
+handleOperator("-");
+} else if (key === "") {
+handleOperator("");
+} else if (key === "/") {
+e.preventDefault();
+handleOperator("/");
+} else if (key === "Enter" || key === "=") {
+e.preventDefault();
+handleEqual();
+} else if (key === "Escape" || key === "Delete") {
+resetCalculator();
+} else if (key === "Backspace") {
+handleBackspace();
+} else if (key === "%") {
+handlePercentage();
+}
+});
+​resetCalculator();
+</script>
+</body>
+</html>
