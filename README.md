@@ -18,7 +18,7 @@
 * `index.html` — основний інтерфейс, логіка запитів до API та робоча зона рендерингу.
 * `sw.js` — Service Worker, що кешує оболонку застосунку для швидкого запуску офлайн.
 * `manifest.json` — маніфест, що дозволяє системі Android ідентифікувати веб-сторінку як нативний додаток.
-* `icon.png` — іконка застосунку (512x512).
+* `icon-512.png` — іконка застосунку (512x512).
 
 ## 📱 Встановлення та використання на смартфоні
 
@@ -30,5 +30,5 @@
 
 ## 🛠 Стек технологій
 * HTML5 / CSS3 / Vanilla JavaScript
-* Google Gemini API (`gemini-1.5-flash` / `gemini-1.5-pro`)
+* Google Gemini API
 * Service Worker API / LocalStorage API
