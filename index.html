@@ -770,13 +770,24 @@
         }
 
         function executeInSandbox(code) {
-            const frame = document.getElementById('appFrame');
-            frame.style.display = "block";
-            const doc = frame.contentDocument || frame.contentWindow.document;
-            doc.open();
-            doc.write(code);
-            doc.close();
+           const container = document.getElementById('outputContainer');
+           const oldFrame = document.getElementById('appFrame');
+
+           if (oldFrame) {
+           oldFrame.remove();
+           }
+           const newFrame = document.createElement('iframe');
+           newFrame.id = 'appFrame';
+            
+           container.appendChild(newFrame);
+           newFrame.style.display = "block";
+            
+           const doc = newFrame.contentDocument || newFrame.contentWindow.document;
+           doc.open();
+           doc.write(code);
+           doc.close();
         }
+
 
         function showVisualError(msg) {
             document.getElementById('statusOverlay').style.display = "none";
